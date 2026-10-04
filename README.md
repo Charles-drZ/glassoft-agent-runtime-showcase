@@ -1,12 +1,12 @@
 # Glassoft Agent Runtime
 
-**A developer-facing AI engineering runtime for bounded, reviewable software execution.**
+**A developer-facing AI engineering runtime for bounded, reviewable software execution — currently powered by NVIDIA hosted inference and Nemotron models.**
 
 Glassoft Agent Runtime (GAR) is an engineering project for running coding agents inside explicit project, security, lifecycle, validation, and review boundaries.
 
 GAR is not built around the assumption that an LLM should become engineering authority. Model output is one input inside a controlled system: accepted work defines scope, GAR owns durable execution state, runtime policy constrains what can happen, evidence is collected independently, and human/native-runtime gates remain explicit.
 
-> **Current state:** active pilot. The system has a real dedicated Linux worker and developer-facing control surface, but it is not presented as production-autonomous infrastructure.
+> **Current state:** active pilot. The system has a real dedicated Linux worker and developer-facing control surface. The current inference lane uses **NVIDIA hosted inference with the Nemotron model family**; GAR remains provider- and model-neutral by design.
 
 ## Why I built it
 
@@ -53,9 +53,18 @@ PR / merge / deployment decision
 
 The current execution worker is a dedicated Ubuntu Linux machine.
 
-macOS remains an operator and native-validation surface where Apple-platform work requires Xcode or physical-device validation.
+Current deployment lane:
 
-Machine choice, backend choice, model choice, and provider choice are deployment facts rather than authority.
+- **agent backend:** OpenCode;
+- **inference provider:** NVIDIA hosted inference;
+- **model family:** NVIDIA Nemotron;
+- **runtime/security boundary:** OpenShell;
+- **operator/native-validation client:** macOS;
+- **engineering source of truth:** GitHub.
+
+This is an important part of GAR's current real-world shape: the system is not only an abstract orchestration layer, it is actively engineered around a working NVIDIA/Nemotron inference lane.
+
+At the same time, GAR deliberately keeps **role, backend, provider, model, and runtime separate**. NVIDIA/Nemotron is the current deployment choice, not a hard-coded authority dependency.
 
 ## Developer front door
 
@@ -78,6 +87,23 @@ Relevant concepts include:
 - explicit abort and recovery.
 
 Backend logs can remain useful evidence, but they are not the lifecycle authority.
+
+## NVIDIA / Nemotron inference lane
+
+GAR's current AI execution path uses **NVIDIA hosted inference** with the **Nemotron model family** behind the managed OpenCode backend.
+
+Provider and model identity are persisted as execution provenance rather than hidden inside a generic "AI" label. That means GAR can show which backend, provider, model, worker, and runtime produced a job's evidence while keeping those implementation choices separate from engineering authority.
+
+This distinction matters in practice:
+
+- NVIDIA is the current hosted inference provider lane;
+- Nemotron is the current model family used by that lane;
+- OpenCode is the managed agent backend;
+- OpenShell is a runtime/security boundary, not the model backend;
+- GAR owns durable job lifecycle and evidence;
+- a change of model or provider does not silently change project authority.
+
+Availability can affect routing or fallback choices, but it does not change GAR's scope, policy, validation, or human gates.
 
 ## Implemented foundations
 
@@ -161,7 +187,7 @@ Model output can propose and implement work inside granted boundaries. It does n
 
 ## Technology and concepts
 
-Go · Linux · GitHub Issues/PRs · OpenCode · OpenShell · systemd · durable job state · agent orchestration · capability contracts · runtime policy · execution evidence · human gates
+Go · Linux · NVIDIA hosted inference · NVIDIA Nemotron · GitHub Issues/PRs · OpenCode · OpenShell · systemd · durable job state · agent orchestration · capability contracts · runtime policy · execution evidence · human gates
 
 ## What this project demonstrates
 
@@ -172,6 +198,7 @@ It demonstrates work on:
 - agent orchestration;
 - durable job and state-machine design;
 - execution and trust boundaries;
+- NVIDIA/Nemotron-backed inference integrated behind a provider-neutral execution contract;
 - backend/provider/model abstraction;
 - developer-facing CLI/runtime UX;
 - failure classification;
