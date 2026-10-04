@@ -1,128 +1,197 @@
 # Glassoft Agent Runtime
 
-**A bounded execution and orchestration layer for AI-assisted software engineering.**
+**A developer-facing AI engineering runtime for bounded, reviewable software execution.**
 
-Glassoft Agent Runtime (GAR) is an engineering project for running coding agents inside explicit project, security, validation, and review boundaries.
+Glassoft Agent Runtime (GAR) is an engineering project for running coding agents inside explicit project, security, lifecycle, validation, and review boundaries.
 
-The goal is not to make an LLM the engineering authority. GAR treats model output as one input inside a controlled delivery system: a GitHub Issue defines the intended outcome, deterministic contracts constrain execution, runtime evidence is collected, and human/native-runtime gates remain authoritative.
+GAR is not built around the assumption that an LLM should become engineering authority. Model output is one input inside a controlled system: accepted work defines scope, GAR owns durable execution state, runtime policy constrains what can happen, evidence is collected independently, and human/native-runtime gates remain explicit.
 
-> **Current state:** pilot / not production-qualified. The public case study distinguishes implemented foundations from target architecture and unqualified runtime paths.
+> **Current state:** active pilot. The system has a real dedicated Linux worker and developer-facing control surface, but it is not presented as production-autonomous infrastructure.
 
 ## Why I built it
 
-AI coding tools are useful, but an unconstrained chat session is a weak foundation for repeatable engineering work.
+AI coding tools are useful, but an unconstrained chat or terminal session is a weak foundation for repeatable engineering work.
 
-For my non-iOS projects I wanted a system that could answer practical questions such as:
+GAR is designed to answer concrete engineering questions:
 
-- What exactly is this agent allowed to change?
+- What exactly is the agent allowed to change?
 - Which project rules and skills apply?
 - Which runtime is allowed to execute the work?
-- What evidence is required before a task can claim completion?
-- How are backend, model, provider, role, and runtime kept separate?
-- What happens when isolation or source evidence is incomplete?
+- Who owns job lifecycle when the terminal detaches?
+- Which backend, provider, model, and runtime actually produced the evidence?
+- What happens when isolation, capability, or source evidence is incomplete?
+- What validation is required before a task can claim completion?
 - Where does human approval remain mandatory?
 
-GAR is my attempt to make those boundaries explicit and testable.
+The aim is to make those boundaries explicit, inspectable, and testable.
 
-## Architecture direction
+## Current architecture
 
 ```text
-GitHub Issue
-      ↓
+GitHub Issue / accepted engineering contract
+                ↓
 deterministic execution packet
-      ↓
-GAR orchestration / durable job state
-      ↓
-bounded execution backend
-      ↓
-coding agent + remote model inference
-      ↓
+                ↓
+GAR daemon + durable job state
+                ↓
+authority / capability / runtime gates
+                ↓
+dedicated Linux worker
+                ↓
+qualified bounded runtime
+                ↓
+agent backend
+                ↓
+provider / model
+                ↓
 build / test / runtime evidence
-      ↓
-independent review and human gates
-      ↓
-draft PR / merge decision
+                ↓
+review + human gates
+                ↓
+PR / merge / deployment decision
 ```
 
-The target execution plane is Raspberry-Pi-resident for always-on orchestration, with macOS kept as an operator and native-validation surface where required.
+The current execution worker is a dedicated Ubuntu Linux machine.
 
-## Implemented and validated foundations
+macOS remains an operator and native-validation surface where Apple-platform work requires Xcode or physical-device validation.
 
-Current private implementation evidence includes:
+Machine choice, backend choice, model choice, and provider choice are deployment facts rather than authority.
+
+## Developer front door
+
+GAR is designed as a scrolling developer shell rather than a full-screen TUI.
+
+The operator starts GAR inside a project and issues natural-language engineering requests while GAR keeps lifecycle and runtime state explicit.
+
+The control surface is built around GAR-owned state rather than raw backend output.
+
+Relevant concepts include:
+
+- project / issue / job / run identity;
+- lifecycle state and execution phase;
+- backend / provider / model provenance;
+- readiness and blocking reason;
+- runtime and worker identity;
+- execution progress and evidence;
+- validation result;
+- next action and human gates;
+- explicit abort and recovery.
+
+Backend logs can remain useful evidence, but they are not the lifecycle authority.
+
+## Implemented foundations
+
+Current private implementation work includes:
 
 - canonical project profiles and skill contracts;
 - deterministic GitHub Issue parsing and execution-packet compilation;
-- fail-closed rejection of incomplete Issue contracts before worker contact;
-- Mac → Raspberry Pi worker preflight;
-- durable job model and registry foundation;
-- GAR daemon/control API foundation;
-- OpenCode supervisor foundation;
-- a provider-neutral agent-backend contract;
-- explicit backend capability declarations and deterministic error classes;
-- focused Go tests plus `gofmt`, `go vet`, `go build`, `go test`, and race validation for the current backend-contract work.
+- fail-closed rejection of incomplete contracts before execution;
+- dedicated worker preflight and worker abstraction;
+- durable job registry and daemon/control API foundations;
+- managed OpenCode backend/session supervision;
+- provider-neutral backend contracts;
+- explicit backend capability declarations;
+- persisted final reports;
+- bounded provider retry;
+- managed job/session wiring, recovery, and explicit abort;
+- OpenShell runtime/security-boundary qualification work;
+- evidence redaction and conservative runtime-failure attribution;
+- Go validation including formatting, vetting, build, test, and race checks across qualified slices.
 
-The backend contract deliberately keeps **role ≠ backend ≠ model ≠ provider ≠ runtime**. Backend-specific provenance is preserved as evidence without making it engineering authority.
+A core invariant is:
+
+`role != backend != model != provider != runtime`
+
+Those identities remain separate so provenance can be recorded without turning any one implementation choice into engineering authority.
+
+## Current development focus
+
+The current control-surface work is making execution easier to understand without weakening the underlying authority model.
+
+That includes:
+
+- smoother pre-execution loading/readiness feedback;
+- richer running-state execution feedback;
+- durable status after detaching/reconnecting;
+- clearer phase/lifecycle separation;
+- explicit provider/model/runtime provenance;
+- validation and evidence surfaced as first-class job state.
+
+The goal is not to recreate OpenCode, Claude Code, or Codex CLI visually. GAR remains a separate runtime layer with its own authority and evidence model.
 
 ## Deliberately not claimed as complete
 
-The following remain gated, blocked, or unqualified and are **not** presented as finished capabilities:
+The following are not presented as finished production capabilities:
 
-- production-qualified sandbox isolation;
-- resource-aware scheduler/admission control;
-- full autonomous phase-gated execution;
-- model/agent routing;
-- independent-review adapter;
-- accepted-invariants ledger;
-- production deployment authority.
+- fully autonomous end-to-end engineering authority;
+- unrestricted host-side agent execution;
+- production deployment authority;
+- mature resource-aware scheduling/admission control;
+- generalized model/agent routing;
+- complete independent-review automation;
+- removal of human merge or product acceptance gates.
 
-The current Raspberry Pi worker has exposed real isolation constraints around Landlock and rootless cgroup memory handling. Those are treated as qualification failures to resolve, not as reasons to weaken the boundary silently.
+When a required guarantee is unavailable, GAR is intended to block, downgrade, or expose that state rather than silently continue with weaker authority.
 
 ## Engineering principles
 
 ### Fail closed
 
-Missing source evidence, incomplete contracts, unavailable isolation, or unsupported backend capabilities must block or downgrade execution rather than producing a confident-looking success state.
+Missing source evidence, incomplete contracts, unavailable runtime guarantees, or unsupported backend capabilities must block or downgrade execution rather than producing a confident-looking success state.
 
 ### Deterministic before semantic
 
-Scope, project configuration, capability declarations, source parsing, and completion evidence should be machine-checkable where possible before model judgment is involved.
+Scope, configuration, capability declarations, source parsing, lifecycle state, and completion evidence should be machine-checkable where possible before model judgment is involved.
+
+### Durable lifecycle ownership
+
+A terminal session is not job authority.
+
+Detaching, reconnecting, or losing a frontend should not invent a second lifecycle or implicitly cancel execution.
 
 ### Evidence over self-report
 
-An agent saying that something is complete is not completion evidence. Builds, tests, runtime checks, diffs, and independent review remain separate signals.
+An agent saying that something is complete is not completion evidence.
+
+Builds, tests, runtime checks, diffs, persisted reports, and independent review remain separate signals.
 
 ### Explicit authority
 
-Model output can propose implementation. It does not own production authority, merge authority, security policy, or final runtime acceptance.
+Model output can propose and implement work inside granted boundaries. It does not automatically own production authority, merge authority, security policy, or final runtime/product acceptance.
 
 ## Technology and concepts
 
-Go · Linux · Raspberry Pi · GitHub Issues/PRs · OpenCode · OpenShell · NVIDIA Nemotron · Podman · systemd · durable job state · capability contracts · runtime evidence · human gates
+Go · Linux · GitHub Issues/PRs · OpenCode · OpenShell · systemd · durable job state · agent orchestration · capability contracts · runtime policy · execution evidence · human gates
 
 ## What this project demonstrates
 
-GAR is primarily a systems-engineering project around AI-assisted development.
+GAR is an AI-engineering and systems-engineering project rather than an LLM wrapper.
 
 It demonstrates work on:
 
-- orchestration and state-machine thinking;
+- agent orchestration;
+- durable job and state-machine design;
 - execution and trust boundaries;
-- provider/backend abstraction;
+- backend/provider/model abstraction;
+- developer-facing CLI/runtime UX;
 - failure classification;
 - bounded automation;
 - reproducible engineering contracts;
 - evidence-driven delivery;
-- infrastructure qualification instead of assumption.
+- runtime qualification instead of assumption.
 
 ## Public boundary
 
-The implementation repository remains private. This public case study does not publish credentials, worker access details, reusable sandbox policy, infrastructure secrets, private prompts, production authority, or deployable operational configuration.
+The implementation repository remains private.
+
+This public case study does not publish credentials, worker addresses, reusable access configuration, infrastructure secrets, private prompts, production authority, or deployable operational policy.
 
 The public material is intentionally descriptive: architecture, engineering decisions, verified outcomes, limitations, and lessons learned.
 
 ## Related work
 
 - [Developer profile](https://github.com/Charles-drZ)
+- [GlassBox](https://github.com/Charles-drZ/glassbox-showcase)
 - [GlassPort](https://github.com/Charles-drZ/glassport-showcase)
 - [NodeMedic](https://github.com/Charles-drZ/nodemedic-showcase)
 - [Automation workflow](https://github.com/Charles-drZ/automation-workflow-showcase)
