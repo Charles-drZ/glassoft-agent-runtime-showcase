@@ -6,7 +6,7 @@ Glassoft Agent Runtime (GAR) is an engineering project for running coding agents
 
 GAR is not built around the assumption that an LLM should become engineering authority. Model output is one input inside a controlled system: accepted work defines scope, GAR owns durable execution state, runtime policy constrains what can happen, evidence is collected independently, and human/native-runtime gates remain explicit.
 
-> **Current state:** active pilot. The system has a real dedicated Linux worker and developer-facing control surface. The current inference lane uses **NVIDIA hosted inference with the Nemotron model family**; GAR remains provider- and model-neutral by design.
+> **Current state:** active pilot. The system has a real dedicated Linux worker, durable interactive control plane, managed OpenShell runtime boundary, and NVIDIA/Nemotron inference lane. Current stacked qualification work is extending the lifecycle through independent review, bounded correction, accepted-workspace promotion, draft PR creation, CI observation, and final evidence persistence. GAR remains provider- and model-neutral by design.
 
 ## Why I built it
 
@@ -113,14 +113,16 @@ Current private implementation work includes:
 - deterministic GitHub Issue parsing and execution-packet compilation;
 - fail-closed rejection of incomplete contracts before execution;
 - dedicated worker preflight and worker abstraction;
-- durable job registry and daemon/control API foundations;
+- durable job registry and daemon/control API;
 - managed OpenCode backend/session supervision;
-- provider-neutral backend contracts;
-- explicit backend capability declarations;
-- persisted final reports;
-- bounded provider retry;
-- managed job/session wiring, recovery, and explicit abort;
-- OpenShell runtime/security-boundary qualification work;
+- explicit **read-only / write-allowed** interactive authority modes;
+- durable interactive session identity and reattach/conversation continuity;
+- managed OpenShell runtime/security qualification and explicit runtime cleanup;
+- provider-neutral backend contracts and capability declarations;
+- persisted final reports and bounded provider retry;
+- deterministic NVIDIA runtime-intelligence events with session/turn/agent/LLM/tool/validator scope identity;
+- bounded reviewer-subagent role with deny-by-default permissions;
+- durable independent-review disposition and bounded correction-loop state;
 - evidence redaction and conservative runtime-failure attribution;
 - Go validation including formatting, vetting, build, test, and race checks across qualified slices.
 
@@ -130,20 +132,26 @@ A core invariant is:
 
 Those identities remain separate so provenance can be recorded without turning any one implementation choice into engineering authority.
 
-## Current development focus
+## Current development frontier
 
-The current control-surface work is making execution easier to understand without weakening the underlying authority model.
+The current stacked qualification line is moving GAR from "bounded execution runtime" toward a complete reviewable engineering lifecycle without giving the model merge or production authority.
 
-That includes:
+The active frontier includes:
 
-- smoother pre-execution loading/readiness feedback;
-- richer running-state execution feedback;
-- durable status after detaching/reconnecting;
-- clearer phase/lifecycle separation;
-- explicit provider/model/runtime provenance;
-- validation and evidence surfaced as first-class job state.
+- accepted workspace and validation eligibility checks;
+- independent reviewer disposition with **ACCEPT / CORRECTION / HUMAN_DECISION** outcomes;
+- at most one bounded correction attempt with materially different correction context;
+- runtime cleanup and explicit abort semantics;
+- isolated source materialization;
+- deterministic Git commit and normal non-force push;
+- draft PR creation and exact-head readback;
+- CI observation as a distinct lifecycle phase;
+- canonical final report persistence and readback;
+- reconciliation rather than blind retry after ambiguous push/PR/report outcomes.
 
-The goal is not to recreate OpenCode, Claude Code, or Codex CLI visually. GAR remains a separate runtime layer with its own authority and evidence model.
+These newer slices are tracked as active qualification work and are not presented as merged production autonomy.
+
+The goal is not to recreate OpenCode, Claude Code, or Codex CLI visually. GAR remains a separate runtime layer with its own authority, state, provenance, reviewer, and evidence model.
 
 ## Deliberately not claimed as complete
 
@@ -154,7 +162,7 @@ The following are not presented as finished production capabilities:
 - production deployment authority;
 - mature resource-aware scheduling/admission control;
 - generalized model/agent routing;
-- complete independent-review automation;
+- generalized independent-review automation beyond the current bounded reviewer/correction contract;
 - removal of human merge or product acceptance gates.
 
 When a required guarantee is unavailable, GAR is intended to block, downgrade, or expose that state rather than silently continue with weaker authority.
@@ -195,14 +203,17 @@ GAR is an AI-engineering and systems-engineering project rather than an LLM wrap
 
 It demonstrates work on:
 
-- agent orchestration;
-- durable job and state-machine design;
-- execution and trust boundaries;
+- agent orchestration and durable interactive sessions;
+- durable job, lifecycle, and state-machine design;
+- read-only/write authority modes and fail-closed execution boundaries;
 - NVIDIA/Nemotron-backed inference integrated behind a provider-neutral execution contract;
-- backend/provider/model abstraction;
+- deterministic runtime-intelligence provenance;
+- bounded reviewer subagents and correction loops;
+- managed runtime cleanup and abort behavior;
+- backend/provider/model/runtime abstraction;
 - developer-facing CLI/runtime UX;
-- failure classification;
-- bounded automation;
+- draft-PR/CI/evidence promotion design;
+- failure and reconciliation classification;
 - reproducible engineering contracts;
 - evidence-driven delivery;
 - runtime qualification instead of assumption.
