@@ -146,12 +146,31 @@ The active frontier includes:
 - deterministic Git commit and normal non-force push;
 - draft PR creation and exact-head readback;
 - CI observation as a distinct lifecycle phase;
-- canonical final report persistence and readback;
-- reconciliation rather than blind retry after ambiguous push/PR/report outcomes.
+- canonical final report persistence/readback and reconciliation;
+- **verified final-response delivery/recovery** after managed OpenCode execution.
 
-These newer slices are tracked as active qualification work and are not presented as merged production autonomy.
+### GAR-036 — final-response integrity and recovery
 
-The goal is not to recreate OpenCode, Claude Code, or Codex CLI visually. GAR remains a separate runtime layer with its own authority, state, provenance, reviewer, and evidence model.
+The newest qualification slice addresses a subtle runtime problem: a managed OpenCode execution can complete while the operator-facing GAR layer still lacks a safely verified final answer.
+
+Current branch work includes:
+
+- JSONL-first final-response extraction;
+- fail-closed separation of extraction failure from storage failure;
+- same-OpenShell-sandbox recovery only when a unique run-bound OpenCode session identity is available;
+- validation of session identity, final assistant `finish=stop`, configured provider/model and raw text parts;
+- reasoning/tool output exclusion;
+- byte bounds, safety filters and SHA-256 integrity before durable response staging;
+- no model retry when delivery/recovery is uncertain;
+- a startup watchdog that converts silent/unstructured startup into **unknown / reconciliation required** rather than pretending success or replaying inference.
+
+The implementation has deterministic offline tests and green self-hosted CI, but **live end-to-end qualification is still incomplete**. A bounded live smoke exposed an important failure mode: local abort occurred while managed OpenCode state was still running and sandbox processes remained present. GAR now records that state as remote-outcome unknown/reconciliation-required instead of claiming that the remote execution was successfully aborted.
+
+That distinction is intentional: unknown is a first-class state.
+
+These newer slices remain active qualification work and are not presented as merged production autonomy.
+
+The goal is not to recreate OpenCode, Claude Code, or Codex CLI visually. GAR remains a separate runtime layer with its own authority, state, provenance, reviewer, response-integrity, and evidence model.
 
 ## Deliberately not claimed as complete
 
@@ -213,7 +232,8 @@ It demonstrates work on:
 - backend/provider/model/runtime abstraction;
 - developer-facing CLI/runtime UX;
 - draft-PR/CI/evidence promotion design;
-- failure and reconciliation classification;
+- failure, unknown-outcome and reconciliation classification;
+- final-response integrity/recovery without inference replay;
 - reproducible engineering contracts;
 - evidence-driven delivery;
 - runtime qualification instead of assumption.
