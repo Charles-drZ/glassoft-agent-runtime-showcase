@@ -2,6 +2,8 @@
 
 **A developer-facing AI engineering runtime for bounded, reviewable software execution — currently powered by NVIDIA hosted inference and Nemotron models.**
 
+**Focus:** Go · AI agents · agent runtime · NVIDIA Nemotron · OpenCode · OpenShell · lifecycle/recovery
+
 Glassoft Agent Runtime (GAR) is an engineering project for running coding agents inside explicit project, security, lifecycle, validation, and review boundaries.
 
 GAR is not built around the assumption that an LLM should become engineering authority. Model output is one input inside a controlled system: accepted work defines scope, GAR owns durable execution state, runtime policy constrains what can happen, evidence is collected independently, and human/native-runtime gates remain explicit.
@@ -245,6 +247,16 @@ The implementation repository remains private.
 This public case study does not publish credentials, worker addresses, reusable access configuration, infrastructure secrets, private prompts, production authority, or deployable operational policy.
 
 The public material is intentionally descriptive: architecture, engineering decisions, verified outcomes, limitations, and lessons learned.
+
+## Engineering note
+
+**[Unknown is a valid engineering state →](https://github.com/Charles-drZ/Charles-drZ/blob/main/engineering-notes/gar-unknown-outcomes-and-reconciliation.md)**
+
+A short write-up on local cancellation vs remote outcome, reconciliation-required state and why uncertain agent execution must not trigger blind replay.
+
+## Follow the work
+
+For accepted milestones, new public case studies and short engineering notes, follow **[@Charles-drZ](https://github.com/Charles-drZ)**.
 
 ## Related work
 
